@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Greenfield Call Desk</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="A cold-call prospecting workbench for a cloud sales development rep: a researched Canadian territory, call sheets, a follow-up cadence and a dial log. An independent concept by Abdullah Al Mneni.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@112,600;112,800;100,500;100,600&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+
+<header class="top">
+  <div class="wrap top-row">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <div>
+        <p class="brand-name">Greenfield Call Desk</p>
+        <p class="brand-sub">Canadian territory · <span id="asof"></span></p>
+      </div>
+    </div>
+    <nav class="tabs" aria-label="Views">
+      <a href="#territory" data-view="territory">Territory</a>
+      <a href="#account" data-view="account">Call sheet</a>
+      <a href="#cadence" data-view="cadence">Cadence</a>
+      <a href="#log" data-view="log">Dial log</a>
+      <a href="#method" data-view="method">Method</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- TERRITORY -->
+<section class="view" id="view-territory" aria-labelledby="h-territory">
+  <div class="wrap">
+    <div class="intro">
+      <div class="intro-text">
+        <p class="eyebrow">Book the first meeting</p>
+        <h1 id="h-territory">Who to call this week, and why now</h1>
+        <p class="lede">Real Canadian companies, each with a public event from the last three months that gives a reason to call. Every event links to its source. Pick an account to open its call sheet.</p>
+      </div>
+      <dl class="stats" id="stats"></dl>
+    </div>
+
+    <div class="controls" role="group" aria-label="Filter and weight the territory">
+      <label class="field"><span>Province</span><select id="f-prov"></select></label>
+      <label class="field"><span>Event type</span><select id="f-type"></select></label>
+      <label class="field grow"><span>Search</span><input id="f-q" type="search" placeholder="Company, city or sector"></label>
+      <details class="weights">
+        <summary>Scoring weights</summary>
+        <div class="weights-body">
+          <label class="slider"><span>Recency</span><input id="w-rec" type="range" min="0" max="5" step="1" value="3"><output id="o-rec">3</output></label>
+          <label class="slider"><span>Event strength</span><input id="w-trig" type="range" min="0" max="5" step="1" value="3"><output id="o-trig">3</output></label>
+          <label class="slider"><span>Size fit</span><input id="w-size" type="range" min="0" max="5" step="1" value="2"><output id="o-size">2</output></label>
+          <label class="slider"><span>Source confidence</span><input id="w-conf" type="range" min="0" max="5" step="1" value="1"><output id="o-conf">1</output></label>
+          <p class="hint">Recency fades from full marks at 0–21 days to a fifth at 90 days. Event strength ranks how directly the event creates a technology decision. Size fit favours 50–1,000 employees, the usual range for a new-customer sales team.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="table-wrap">
+      <table class="terr" id="terr">
+        <thead>
+          <tr><th class="num">#</th><th>Account</th><th>Why now</th><th class="num">Days ago</th><th>Score</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="empty" id="terr-empty" hidden>No accounts match. Clear the search or pick another province.</p>
+    <div class="row-actions">
+      <button class="btn ghost" id="copy-csv" type="button">Copy territory as CSV</button>
+      <span class="toast" id="toast-csv" role="status" aria-live="polite"></span>
+    </div>
+  </div>
+</section>
+
+<!-- CALL SHEET -->
+<section class="view" id="view-account" aria-labelledby="h-account" hidden>
+  <div class="wrap">
+    <div class="sheet-head">
+      <label class="field"><span>Account</span><select id="acct-pick"></select></label>
+      <div class="sheet-nav">
+        <button class="btn ghost" id="prev-acct" type="button" aria-label="Previous account">← Previous</button>
+        <button class="btn ghost" id="next-acct" type="button" aria-label="Next account">Next →</button>
+      </div>
+    </div>
+
+    <div class="sheet">
+      <aside class="sheet-side">
+        <p class="eyebrow" id="a-rank"></p>
+        <h1 id="h-account"></h1>
+        <p class="meta" id="a-meta"></p>
+        <div class="trigger-box">
+          <p class="chip-row"><span class="chip" id="a-type"></span><span class="mono" id="a-date"></span></p>
+          <p id="a-trigger"></p>
+          <p class="src" id="a-src"></p>
+        </div>
+        <h2 class="h3">Who to call</h2>
+        <ul class="personas" id="a-personas"></ul>
+        <h2 class="h3">Hypothesis to test</h2>
+        <p id="a-angle"></p>
+        <p class="hint">A hypothesis, not a fact about their systems. Check the CRM for existing contacts and open opportunities before dialling.</p>
+      </aside>
+
+      <div class="sheet-main">
+        <article class="script" aria-labelledby="s-open">
+          <h2 id="s-open" class="h3">Opener <span class="tag">about 30 seconds</span></h2>
+          <blockquote id="a-opener"></blockquote>
+        </article>
+        <article class="script" aria-labelledby="s-disc">
+          <h2 id="s-disc" class="h3">Discovery questions</h2>
+          <ol id="a-disc"></ol>
+        </article>
+        <article class="script" aria-labelledby="s-obj">
+          <h2 id="s-obj" class="h3">Likely objection</h2>
+          <p class="obj" id="a-obj-q"></p>
+          <p id="a-obj-a"></p>
+        </article>
+        <article class="script" aria-labelledby="s-vm">
+          <h2 id="s-vm" class="h3">Voicemail <span class="tag">under 20 seconds</span></h2>
+          <blockquote id="a-vm"></blockquote>
+        </article>
+        <article class="script" aria-labelledby="s-mail">
+          <h2 id="s-mail" class="h3">Follow-up email</h2>
+          <pre class="mail" id="a-mail"></pre>
+        </article>
+
+        <form class="prequal" id="prequal" aria-labelledby="s-pq">
+          <h2 id="s-pq" class="h3">Pre-qualification notes for the seller</h2>
+          <p class="hint">Fill this in during or right after the call. It saves in this browser only. The fields follow a general budget, authority, need and timing checklist, not any company's internal method.</p>
+          <div class="pq-grid">
+            <label class="field"><span>Spoke with (title)</span><input id="pq-who" type="text" autocomplete="off"></label>
+            <label class="field"><span>Current setup</span><input id="pq-setup" type="text" autocomplete="off" placeholder="On-premises, another cloud, mixed, unknown"></label>
+            <label class="field wide"><span>Pain in their words</span><textarea id="pq-pain" rows="2"></textarea></label>
+            <label class="field"><span>Who else decides</span><input id="pq-auth" type="text" autocomplete="off"></label>
+            <label class="field"><span>Timing</span><select id="pq-time"><option value="">Not discussed</option><option>This quarter</option><option>Next 6 months</option><option>Next 12 months</option><option>No plan</option></select></label>
+            <label class="field"><span>Budget signal</span><select id="pq-budget"><option value="">Not discussed</option><option>Budget set aside</option><option>Would need approval</option><option>No budget</option></select></label>
+            <label class="field"><span>Next step</span><input id="pq-next" type="text" autocomplete="off" placeholder="20-minute meeting on…"></label>
+          </div>
+          <div class="row-actions">
+            <button class="btn" id="copy-handoff" type="button">Copy handoff note</button>
+            <button class="btn ghost" id="clear-pq" type="button">Clear notes</button>
+            <span class="toast" id="toast-pq" role="status" aria-live="polite"></span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CADENCE -->
+<section class="view" id="view-cadence" aria-labelledby="h-cadence" hidden>
+  <div class="wrap">
+    <div class="intro">
+      <div class="intro-text">
+        <p class="eyebrow">Six touches, ten business days</p>
+        <h1 id="h-cadence">Follow-up cadence</h1>
+        <p class="lede">One unanswered call is not a no, so every account gets the same six-step sequence before it is set aside. Dates skip weekends and Ontario statutory holidays.</p>
+      </div>
+    </div>
+    <div class="controls">
+      <label class="field"><span>Start date</span><input id="c-start" type="date"></label>
+      <label class="field"><span>Accounts</span><select id="c-n"><option value="5">Top 5</option><option value="10" selected>Top 10</option><option value="20">Top 20</option><option value="all">All</option></select></label>
+      <label class="field"><span>New accounts per day</span><select id="c-stagger"><option value="0">All on day 1</option><option value="2">2 per day</option><option value="3" selected>3 per day</option><option value="5">5 per day</option></select></label>
+    </div>
+    <ol class="steps" id="c-steps"></ol>
+    <h2 class="h2">By day</h2>
+    <div class="days" id="c-days"></div>
+    <div class="row-actions">
+      <button class="btn ghost" id="copy-cad" type="button">Copy cadence as CSV</button>
+      <span class="toast" id="toast-cad" role="status" aria-live="polite"></span>
+    </div>
+  </div>
+</section>
+
+<!-- DIAL LOG -->
+<section class="view" id="view-log" aria-labelledby="h-log" hidden>
+  <div class="wrap">
+    <div class="intro">
+      <div class="intro-text">
+        <p class="eyebrow">Activity against target</p>
+        <h1 id="h-log">Dial log</h1>
+        <p class="lede">Log each calling block: dials, connects, conversations and first meetings booked. The funnel shows where calls drop off, and the pace line shows whether this week's meeting target is on track.</p>
+      </div>
+    </div>
+    <p class="banner" id="sample-banner" hidden>Showing a <strong>made-up sample week</strong> so the charts have something to draw. Log your first block to replace it.</p>
+
+    <div class="log-grid">
+      <form class="log-form" id="log-form" aria-labelledby="h-logform">
+        <h2 id="h-logform" class="h3">Log a block</h2>
+        <label class="field"><span>Date</span><input id="l-date" type="date" required></label>
+        <div class="nums">
+          <label class="field"><span>Dials</span><input id="l-dials" type="number" min="0" step="1" inputmode="numeric" required></label>
+          <label class="field"><span>Connects</span><input id="l-conn" type="number" min="0" step="1" inputmode="numeric" required></label>
+          <label class="field"><span>Conversations</span><input id="l-conv" type="number" min="0" step="1" inputmode="numeric" required></label>
+          <label class="field"><span>Meetings</span><input id="l-meet" type="number" min="0" step="1" inputmode="numeric" required></label>
+        </div>
+        <p class="form-error" id="l-error" role="alert" hidden></p>
+        <button class="btn" type="submit">Add block</button>
+        <label class="field"><span>Weekly meeting target</span><input id="l-target" type="number" min="1" step="1" inputmode="numeric"></label>
+        <p class="hint">Connect: someone picked up. Conversation: they stayed past the opener. Meeting: a first meeting booked for a seller.</p>
+      </form>
+
+      <div class="log-out">
+        <dl class="stats" id="log-stats"></dl>
+        <figure class="chart">
+          <figcaption class="h3">Funnel, all logged blocks</figcaption>
+          <div id="funnel"></div>
+        </figure>
+        <figure class="chart">
+          <figcaption class="h3">Meetings this week vs target <span class="mono" id="week-label"></span></figcaption>
+          <div id="pace"></div>
+        </figure>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="logt" id="logt">
+        <thead><tr><th>Date</th><th class="num">Dials</th><th class="num">Connects</th><th class="num">Conversations</th><th class="num">Meetings</th><th class="num">Connect rate</th><th><span class="sr">Remove</span></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="row-actions">
+      <button class="btn ghost" id="clear-log" type="button">Clear my log</button>
+      <span class="confirm" id="confirm-clear" hidden>Delete every logged block in this browser? <button class="btn danger" id="confirm-yes" type="button">Delete</button> <button class="btn ghost" id="confirm-no" type="button">Keep</button></span>
+    </div>
+  </div>
+</section>
+
+<!-- METHOD -->
+<section class="view" id="view-method" aria-labelledby="h-method" hidden>
+  <div class="wrap prose">
+    <p class="eyebrow">How this was built</p>
+    <h1 id="h-method">Method and limits</h1>
+    <p>I built this to practise the work of a cloud sales development rep: research an account, find a reason to call, open in thirty seconds, ask good questions, hand clean notes to a seller, and keep calling until the meeting is booked.</p>
+    <h2 class="h2">Where the accounts come from</h2>
+    <p id="m-sources"></p>
+    <ul>
+      <li>Each account has one public event (an expansion, acquisition, funding round, new digital service, leadership hire, grant or contract) dated between <span id="m-from"></span> and <span id="m-to"></span>. The event links to the press release or news story it came from.</li>
+      <li>Companies were left out if their own public material says they are customers or partners of a major cloud provider, if they sell IT services, or if they have more than about 5,000 employees.</li>
+      <li>Employee counts appear only where a source gives one. Otherwise the page says "unknown".</li>
+      <li>The page names job titles to call, never individual people. The only names shown are executives named in the event itself.</li>
+    </ul>
+    <h2 class="h2">How the call sheets are written</h2>
+    <p>The opener, discovery questions, objection, voicemail and email are built from the event type and the account's own event. They are starting points to rehearse and rewrite, not finished scripts. The "hypothesis to test" is a guess about the business problem, written to be confirmed or dropped in the first conversation.</p>
+    <h2 class="h2">What this page does not know</h2>
+    <ul>
+      <li>Which cloud provider, if any, each company uses today, and whether it already has a sales relationship with one.</li>
+      <li>Any internal CRM data, territory assignment or qualification method used by a real sales team.</li>
+      <li>Real call results. The dial log holds only what you enter, in this browser. Until you log a block it shows a made-up sample week, labelled as such.</li>
+    </ul>
+    <h2 class="h2">Tools</h2>
+    <p>Built with Claude Code. Research used public web sources, each checked against its page. The page is plain HTML, CSS and JavaScript with no libraries.</p>
+    <p class="disclaimer">Independent student project by Abdullah Al Mneni (Business Technology Management, Toronto Metropolitan University). Not affiliated with, endorsed by or built for Amazon Web Services or any company listed here. No one listed here has been contacted through this project.</p>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-row">
+    <p>Greenfield Call Desk · Abdullah Al Mneni · independent concept, public sources</p>
+    <p><a href="#method">Method and limits</a></p>
+  </div>
+</footer>
+
+<script src="assets/site-data.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
