@@ -6,6 +6,7 @@ to a seller, and keep following up until the meeting is booked.
 
 **Built by:** Abdullah Al Mneni, Business Technology Management, Toronto Metropolitan University
 **Written for:** the AWS Customer Acquisition Representative Intern posting (job 10590674, Toronto, Summer 2027)
+**Live page:** https://abdullahmanini.github.io/greenfield-call-desk/
 
 > **Independent student project.** Not affiliated with, endorsed by or built for Amazon Web Services or any
 > company listed. No one listed has been contacted through this project. Built with Claude Code.
